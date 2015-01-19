@@ -21,42 +21,40 @@
   */
 
   module('jQuery#scrollAway', {
-    // This will run before each test in this module.
     setup: function() {
-      this.elems = $('#qunit-fixture').children();
+      this.el = $('#qunit-fixture').children();
+    },
+    teardown: function() {
+      this.el.remove();
     }
   });
 
-  test('is chainable', function() {
+  test('exists', function() {
     expect(1);
-    // Not a bad test to run on collection methods.
-    strictEqual(this.elems.scrollAway(), this.elems, 'should be chainable');
+    ok($.fn.scrollAway, 'should exist and not be undefined');
   });
 
-  test('is awesome', function() {
-    expect(1);
-    strictEqual(this.elems.scrollAway().text(), 'awesome0awesome1awesome2', 'should be awesome');
+  test('is chainable', function() {
+    expect(2);
+    strictEqual(this.el.scrollAway(), this.el, 'should be chainable');
+    this.el.scrollAway().addClass("test");
+    ok(this.el.attr("class"), "test", 'accepts class added by chained function');
+  });
+
+  test('has default options', function() {
+    expect(3);
+    ok($.fn.scrollAway.defaults, 'should exist and not be undefined');
+    equal($.fn.scrollAway.defaults.animation, 'fade', 'should be set');
+    $.fn.scrollAway.defaults.animation = 'slide';
+    equal($.fn.scrollAway.defaults.animation, 'slide', 'can be modified globally');
   });
 
   module('jQuery.scrollAway');
 
-  test('is awesome', function() {
+  test('throws an error', function() {
     expect(2);
-    strictEqual($.scrollAway(), 'awesome.', 'should be awesome');
-    strictEqual($.scrollAway({punctuation: '!'}), 'awesome!', 'should be thoroughly awesome');
-  });
-
-  module(':scrollAway selector', {
-    // This will run before each test in this module.
-    setup: function() {
-      this.elems = $('#qunit-fixture').children();
-    }
-  });
-
-  test('is awesome', function() {
-    expect(1);
-    // Use deepEqual & .get() when comparing jQuery objects.
-    deepEqual(this.elems.filter(':scrollAway').get(), this.elems.last().get(), 'knows awesome when it sees it');
+    throws($.scrollAway, 'should throw an error when called as a static method');
+    throws($.scrollAway, /No element specified/, 'should show the right error text');
   });
 
 }(jQuery));
