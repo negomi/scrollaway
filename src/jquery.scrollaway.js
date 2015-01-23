@@ -9,126 +9,171 @@
 (function($) {
   'use strict';
 
-  // Collection method.
-  $.fn.scrollAway = function(options) {
-    // Override default options with passed in options.
-    options = $.extend({}, $.fn.scrollAway.defaults, options || {});
+  // Set element and override default options with passed in options.
+  function ScrollAway(element, options) {
+    this.$element = $(element);
+    this.options = $.extend({}, this.defaults, options || {});
+    this.init();
+  }
 
-    // Limit the scroll event to firing every n milliseconds, determined by
-    // the specified delay. A small delay is recommended because triggering
-    // immediately can be annoying due to scroll sensitivity.
-    var throttle = function(fn, delay) {
-      var last, deferTimer;
-      return function () {
-        var context = this;
-        var now = new Date().getTime(), args = arguments;
-        if (last && now < last + delay) {
-          clearTimeout(deferTimer);
-          deferTimer = setTimeout(function () {
-            last = now;
-            fn.apply(context, args);
-          }, delay);
-        } else {
+  ScrollAway.prototype.init = function() {
+    var self = this;
+
+    this.setOptsByType(self);
+    this.validateOptions();
+    this.setAnimations(this.options.animation);
+
+    this.previousScroll = 0;
+
+    $(window).scroll(this.throttle(function() {
+      self.handleScroll();
+    }, this.options.delay));
+  };
+
+  // Check if any of the specified show conditions are satisfied,
+  // and then show/hide the element as necessary. Any errors thrown
+  // will be due to an unrecognised easing value.
+  ScrollAway.prototype.handleScroll = function() {
+    this.currentScroll = $(window).scrollTop();
+    this.setShowConditions();
+
+    try {
+      if (this.showConditions.some(this.isTrue)) {
+        this.show.call(this.$element, this.optsByType.animation);
+      } else {
+        this.hide.call(this.$element, this.optsByType.animation);
+      }
+    }
+    catch(err) {
+      $.error('Unknown easing value. ' +
+              'Core jQuery options are \'swing\' or \'linear\'.');
+    }
+
+    this.previousScroll = this.currentScroll;
+  };
+
+  // Set the conditions on which to show the element. It will always show on
+  // scroll up, or at the top of the page. Showing it at the bottom is optional
+  // and determined by the autoShowAtBottom option.
+  ScrollAway.prototype.setShowConditions = function() {
+    var scrollUpEvent, atTop, atBottom;
+
+    if (this.showConditions) {
+      this.showConditions.length = 0;
+    } else {
+      this.showConditions = [];
+    }
+
+    scrollUpEvent = this.currentScroll < this.previousScroll;
+    this.showConditions.push(scrollUpEvent);
+
+    atTop = this.currentScroll <= 0 + this.options.topTriggerDistance;
+    this.showConditions.push(atTop);
+
+    if (this.options.autoShowAtBottom) {
+      atBottom = this.currentScroll + $(window).height() >=
+      $(document).height() - this.options.bottomTriggerDistance;
+      this.showConditions.push(atBottom);
+    }
+  };
+
+  // Set show/hide to the most appropriate jQuery function.
+  ScrollAway.prototype.setAnimations = function(options) {
+    switch (options) {
+      case 'fade':
+        ScrollAway.prototype.show = $.fn.fadeIn;
+        ScrollAway.prototype.hide = $.fn.fadeOut;
+        break;
+      case 'slide':
+        ScrollAway.prototype.show = $.fn.slideDown;
+        ScrollAway.prototype.hide = $.fn.slideUp;
+        break;
+      default:
+        ScrollAway.prototype.show = $.fn.show;
+        ScrollAway.prototype.hide = $.fn.hide;
+        break;
+    }
+  };
+
+  // Store options grouped for easy access/type checking.
+  ScrollAway.prototype.setOptsByType = function(self) {
+    this.optsByType = {
+      num: {
+        duration: self.options.duration,
+        delay: self.options.delay,
+        topTriggerDistance: self.options.topTriggerDistance,
+        bottomTriggerDistance: self.options.bottomTriggerDistance
+      },
+      bool: {
+        autoShowAtBottom: self.options.autoShowAtBottom
+      },
+      animation: {
+        easing: self.options.easing,
+        duration: self.options.duration
+      }
+    };
+  };
+
+  // Check supplied options to make sure their types make sense.
+  ScrollAway.prototype.validateOptions = function() {
+    this.checkType(this.optsByType.num, 'number', 'must be a number');
+    this.checkType(this.optsByType.bool, 'boolean', 'must be true or false');
+  };
+
+  // Check type of all the values of a given object. Input must be an object
+  // as the keys are used with msg to create a meaningful error message.
+  ScrollAway.prototype.checkType = function(input, type, msg) {
+    if (typeof input === 'object') {
+      $.each(input, function(key, val) {
+        if (typeof val !== type) {
+          $.error(key + ' ' + msg + '.');
+        }
+      });
+    }
+  };
+
+  // Limit the scroll event to firing every n milliseconds, determined by
+  // the specified delay. A small delay is recommended because triggering
+  // immediately can be annoying due to scroll sensitivity.
+  ScrollAway.prototype.throttle = function(fn, delay) {
+    var last, deferTimer;
+    return function () {
+      var context = this;
+      var now = new Date().getTime(), args = arguments;
+      if (last && now < last + delay) {
+        clearTimeout(deferTimer);
+        deferTimer = setTimeout(function () {
           last = now;
           fn.apply(context, args);
-        }
-      };
-    };
-
-    // Check type of all the values of a given object. Input must be an object
-    // as the keys are used with msg to create a meaningful error message.
-    var checkType = function(input, type, msg) {
-      if (typeof input === 'object') {
-        $.each(input, function(key, val) {
-          if (typeof val !== type) {
-            $.error(key + ' ' + msg + '.');
-          }
-        });
+        }, delay);
+      } else {
+        last = now;
+        fn.apply(context, args);
       }
     };
+  };
 
-    // Check if a given value or expression is truthy.
-    var isTrue = function(exp) { return !!exp; };
+  // Check if a given value or expression is truthy.
+  ScrollAway.prototype.isTrue = function(exp) {
+    return !!exp;
+  };
 
-    // Hide or show each element on which scrollAway() is executed.
+  // Collection method.
+  $.fn.scrollAway = function(options) {
+    // Hide or show each element to which scrollAway() is applied.
     return this.each(function() {
-      var $element = $(this);
-      var previousScroll = 0;
-      var show, hide;
-
-      var numberOptions = {
-        duration: options.duration,
-        delay: options.delay,
-        topTriggerDistance: options.topTriggerDistance,
-        bottomTriggerDistance: options.bottomTriggerDistance
-      };
-
-      var booleanOptions = {
-        autoShowAtBottom: options.autoShowAtBottom
-      };
-
-      // Check supplied options to make sure their types make sense.
-      checkType(numberOptions, 'number', 'must be a number');
-      checkType(booleanOptions, 'boolean', 'must be true or false');
-
-      // Set show/hide functions to the most appropriate jQuery function.
-      switch (options.animation) {
-        case 'fade':
-          show = $.fn.fadeIn;
-          hide = $.fn.fadeOut;
-          break;
-        case 'slide':
-          show = $.fn.slideDown;
-          hide = $.fn.slideUp;
-          break;
-        default:
-          show = $.fn.show;
-          hide = $.fn.hide;
-          break;
-      }
-
-      // Define options object to pass to show/hide.
-      var animationOptions = {
-        easing: options.easing,
-        duration: options.duration
-      };
-
-      // Determine desired element state on scroll event.
-      $(window).scroll(throttle(function() {
-        var currentScroll = $(this).scrollTop();
-        var scrollUpEvent = currentScroll < previousScroll;
-        var atTop = currentScroll <= 0 + options.topTriggerDistance;
-        var atBottom;
-        var showConditions = [scrollUpEvent, atTop];
-
-        if (options.autoShowAtBottom) {
-          atBottom = currentScroll + $(window).height() >=
-                     $(document).height() - options.bottomTriggerDistance;
-          showConditions.push(atBottom);
-        }
-
-        // Check if any of the specified show conditions are satisfied,
-        // and then show/hide the element as necessary. Any errors thrown
-        // will be due to an unrecognised easing value.
-        try {
-          if (showConditions.some(isTrue)) {
-            show.call($element, animationOptions);
-          } else {
-            hide.call($element, animationOptions);
-          }
-        }
-        catch(err) {
-          $.error('Unknown easing value. ' +
-                  'Core jQuery options are \'swing\' or \'linear\'.');
-        }
-
-        previousScroll = currentScroll;
-      }, options.delay));
+      $.data(this, 'scrollAway', new ScrollAway(this, options));
     });
   };
 
+  // Throw error if called as a static method.
+  $.scrollAway = function() {
+    $.error('No element specified for scrollAway. ' +
+            'Try: $("#your-element").scrollAway();');
+  };
+
   // Set default options.
-  $.fn.scrollAway.defaults = {
+  ScrollAway.prototype.defaults = {
     animation: 'fade',
     duration: 400,
     easing: 'swing',
@@ -136,12 +181,6 @@
     topTriggerDistance: 0,
     bottomTriggerDistance: 0,
     autoShowAtBottom: true
-  };
-
-  // Throw error if called as a static method.
-  $.scrollAway = function() {
-    $.error('No element specified for scrollAway. ' +
-            'Try: $("#your-element").scrollAway();');
   };
 
 }(jQuery));
