@@ -19,7 +19,7 @@
   ScrollAway.prototype.init = function() {
     var self = this;
 
-    this.setOptsByType(self);
+    this.setOptsByType(this.options);
     this.validateOptions();
     this.setAnimations(this.options.animation);
 
@@ -30,13 +30,19 @@
     }, this.options.delay));
   };
 
-  // Check if any of the specified show conditions are satisfied,
-  // and then show/hide the element as necessary. Any errors thrown
-  // will be due to an unrecognised easing value.
+  // Set current scroll position, set show conditions, and call
+  // function responsible for hiding/showing the element.
   ScrollAway.prototype.handleScroll = function() {
     this.currentScroll = $(window).scrollTop();
     this.setShowConditions();
+    this.handleElement();
+    this.previousScroll = this.currentScroll;
+  };
 
+  // Check if any of the specified show conditions are satisfied,
+  // and then show/hide the element as necessary. Any errors thrown
+  // will be due to an unrecognised easing value.
+  ScrollAway.prototype.handleElement = function() {
     try {
       if (this.showConditions.some(this.isTrue)) {
         this.show.call(this.$element, this.optsByType.animation);
@@ -48,8 +54,6 @@
       $.error('Unknown easing value. ' +
               'Core jQuery options are \'swing\' or \'linear\'.');
     }
-
-    this.previousScroll = this.currentScroll;
   };
 
   // Set the conditions on which to show the element. It will always show on
@@ -78,8 +82,8 @@
   };
 
   // Set show/hide to the most appropriate jQuery function.
-  ScrollAway.prototype.setAnimations = function(options) {
-    switch (options) {
+  ScrollAway.prototype.setAnimations = function(animation) {
+    switch (animation) {
       case 'fade':
         ScrollAway.prototype.show = $.fn.fadeIn;
         ScrollAway.prototype.hide = $.fn.fadeOut;
@@ -96,20 +100,20 @@
   };
 
   // Store options grouped for easy access/type checking.
-  ScrollAway.prototype.setOptsByType = function(self) {
+  ScrollAway.prototype.setOptsByType = function(options) {
     this.optsByType = {
       num: {
-        duration: self.options.duration,
-        delay: self.options.delay,
-        topTriggerDistance: self.options.topTriggerDistance,
-        bottomTriggerDistance: self.options.bottomTriggerDistance
+        duration: options.duration,
+        delay: options.delay,
+        topTriggerDistance: options.topTriggerDistance,
+        bottomTriggerDistance: options.bottomTriggerDistance
       },
       bool: {
-        autoShowAtBottom: self.options.autoShowAtBottom
+        autoShowAtBottom: options.autoShowAtBottom
       },
       animation: {
-        easing: self.options.easing,
-        duration: self.options.duration
+        easing: options.easing,
+        duration: options.duration
       }
     };
   };
@@ -123,18 +127,21 @@
   // Check type of all the values of a given object. Input must be an object
   // as the keys are used with msg to create a meaningful error message.
   ScrollAway.prototype.checkType = function(input, type, msg) {
+    // FIXME: needs proper type checking
     if (typeof input === 'object') {
       $.each(input, function(key, val) {
         if (typeof val !== type) {
           $.error(key + ' ' + msg + '.');
         }
       });
+    } else {
+      $.error('Input must be an object.');
     }
   };
 
   // Limit the scroll event to firing every n milliseconds, determined by
-  // the specified delay. A small delay is recommended because triggering
-  // immediately can be annoying due to scroll sensitivity.
+  // the specified delay. A small delay is recommended because it can reduce
+  // immediate triggering, which can be annoying due to scroll sensitivity.
   ScrollAway.prototype.throttle = function(fn, delay) {
     var last, deferTimer;
     return function () {
