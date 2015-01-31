@@ -9,20 +9,42 @@
 
             #top-bar {
                 position: fixed;
-                height: 5rem;
+                height: 4rem;
                 width: 100%;
                 background: black;
             }
 
             .content {
-                width: 50%;
-                padding: 5rem 0;
-                margin: 0 auto;
-                font: normal 1.5rem/2.5rem Georgia;
+                padding: 4rem 1rem;
+                font: normal 1rem/2rem Georgia;
             }
 
             h1 {
-                margin: 4rem 0 3rem;
+                margin: 3rem 0 2rem;
+            }
+
+            @media only screen and (min-width: 736px) {
+                #top-bar {
+                    height: 5rem;
+                }
+
+                .content {
+                    width: 70%;
+                    margin: 0 auto;
+                    padding: 5rem 0;
+                    font-size: 1.5rem;
+                    line-height: 2.5rem;
+                }
+
+                h1 {
+                    margin: 4rem 0 3rem;
+                }
+            }
+
+            @media only screen and (min-width: 1024px) {
+                .content {
+                    width: 50%;
+                }
             }
         </style>
     </head>
