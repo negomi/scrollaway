@@ -105,14 +105,6 @@
     ok(this.plugin.validateOptions, 'should exist and not be undefined');
   });
 
-  // test('checkType', function() {
-
-  // });
-
-  // test('throttle', function() {
-
-  // });
-
   test('isTrue', function() {
     expect(2);
     equal(this.plugin.isTrue(1 < 2), true, 'returns true if an expression is truthy');

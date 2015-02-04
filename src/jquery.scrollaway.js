@@ -127,8 +127,7 @@
   // Check type of all the values of a given object. Input must be an object
   // as the keys are used with msg to create a meaningful error message.
   ScrollAway.prototype.checkType = function(input, type, msg) {
-    // FIXME: needs proper type checking
-    if (typeof input === 'object') {
+    if (input.constructor === Object) {
       $.each(input, function(key, val) {
         if (typeof val !== type) {
           $.error(key + ' ' + msg + '.');
