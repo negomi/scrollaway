@@ -25,16 +25,60 @@ jQuery(function($) {
 ## Documentation
 scrollAway.js comes with a sensible set of defaults so it will just work without configuration. You can customize it by passing an object to each scrollAway.js instance, specifying some or all of the following options:
 
-| Option | Type | Default | Description |
-| ------------------------------------- |
-| `animation` | String | `'fade'` | The jQuery animation to apply when showing/hiding the element. Accepts either `fade` or `slide`. Anything else will toggle the element with no animation. |
-| `duration` | Number | `400` | The time (in milliseconds) the animation should take to complete. |
-| `easing` | String | `'swing'` | The easing function to use for the animation. Accepts `swing` or `linear`. |
-| `delay` | Number | `350` | How often to fire the scroll event. |
-| `topTriggerDistance` | Number | `0` | How far the user should have scrolled from the top of the page (in pixels) before triggering the plugin on scroll down. |
-| `bottomTriggerDistance` | Number | `0` | How far the user should be from the bottom of the page (in pixels) before triggering the plugin on scroll up. |
-| `autoShowAtBottom` | Boolean | `true` | Whether to show the element regardless of scroll direction when the user has reached the bottom of the page. |
-
+<table>
+  <thead>
+    <tr>
+      <th>Option</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>animation</code></td>
+      <td>String</td>
+      <td><code>&#39;fade&#39;</code></td>
+      <td>The jQuery animation to apply when showing/hiding the element. Accepts either <code>fade</code> or <code>slide</code>. Anything else will toggle the element with no animation.</td>
+    </tr>
+    <tr>
+      <td><code>duration</code></td>
+      <td>Number</td>
+      <td><code>400</code></td>
+      <td>The time (in milliseconds) the animation should take to complete.</td>
+    </tr>
+    <tr>
+      <td><code>easing</code></td>
+      <td>String</td>
+      <td><code>&#39;swing&#39;</code></td>
+      <td>The easing function to use for the animation. Accepts <code>swing</code> or <code>linear</code>.</td>
+    </tr>
+    <tr>
+      <td><code>delay</code></td>
+      <td>Number</td>
+      <td><code>350</code></td>
+      <td>How often to fire the scroll event.</td>
+    </tr>
+    <tr>
+      <td><code>topTriggerDistance</code></td>
+      <td>Number</td>
+      <td><code>0</code></td>
+      <td>How far the user should have scrolled down from the top of the page (in pixels) before triggering the plugin.</td>
+    </tr>
+    <tr>
+      <td><code>bottomTriggerDistance</code></td>
+      <td>Number</td>
+      <td><code>0</code></td>
+      <td>How far the user should have scrolled up from the bottom of the page (in pixels) before triggering the plugin.</td>
+    </tr>
+    <tr>
+      <td><code>autoShowAtBottom</code></td>
+      <td>Boolean</td>
+      <td><code>true</code></td>
+      <td>Whether to show the element when the user reaches the bottom of the page.</td>
+    </tr>
+  </tbody>
+</table>
 
 ## Examples
 Top bar: http://negomi.github.io/scrollaway/
