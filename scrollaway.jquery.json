@@ -1,7 +1,7 @@
 {
   "name": "scrollaway",
   "title": "scrollAway.js",
-  "description": "A tiny jQuery plugin that hides elements as you scroll dowm, and shows them again if you scroll up.",
+  "description": "A simple jQuery plugin that hides elements on scroll down, and reveals them on scroll up.",
   "version": "0.1.0",
   "homepage": "https://github.com/negomi/scrollaway",
   "author": {
